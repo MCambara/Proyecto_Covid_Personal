@@ -5,6 +5,9 @@ import org.prograIII.db.model.ReportModel;
 import org.springframework.stereotype.Repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.TreeMap;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,4 +35,38 @@ public class ReportDao {
             return false;
         }
     }
+
+    public TreeMap<String, ReportModel> findByDateAndIso(String date, String iso) {
+        TreeMap<String, ReportModel> reportsMap = new TreeMap<>();
+        String sql = "SELECT * FROM covid_reports WHERE date = ? AND iso = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, date);
+            stmt.setString(2, iso);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ReportModel report = new ReportModel(
+                        rs.getInt("id"),
+                        rs.getString("date"),
+                        rs.getInt("confirmed"),
+                        rs.getInt("deaths"),
+                        rs.getInt("recovered"),
+                        rs.getString("iso"),
+                        rs.getString("region_name"),
+                        rs.getString("province")
+                );
+
+                // Usamos provincia como clave para eliminar duplicados automáticamente
+                reportsMap.put(report.getProvince(), report);
+            }
+        } catch (Exception e) {
+            logger.error("[ERROR] Error fetching reports for date={} and iso={}: {}", date, iso, e.getMessage());
+        }
+
+        return reportsMap;
+    }
+
 }
