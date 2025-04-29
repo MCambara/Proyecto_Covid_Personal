@@ -13,7 +13,7 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String queryDate = "2024-03-09";
+        String queryDate = "2022-03-09";
         String iso = "USA";
 
         logger.info("Seleccione una opción:");

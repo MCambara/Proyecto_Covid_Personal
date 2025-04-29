@@ -29,23 +29,20 @@ public class ReportProcessor {
 
         ReportCollector reportCollector = new ReportCollector();
 
-        // Contador de reportes procesados
         int processedReportsCount = 0;
 
-        // Procesar los reportes para cada ISO
         for (Map.Entry<String, List<ReportLoader>> entry : covidReports.entrySet()) {
             String iso = entry.getKey();
             List<ReportLoader> reportList = entry.getValue();
 
-            logger.info("[INFO] Processing reports for ISO: {}", iso);
-            processedReportsCount += reportList.size();  // Contar cuántos reportes se procesan para este ISO
+            logger.info("[INFO] Processing reports for ISO: {} on date: {}", iso, queryDate);
+            processedReportsCount += reportList.size();
 
             reportList.forEach(reportCollector::collect);
         }
 
         logger.info("[INFO] Total reports fetched for date '{}': {}", queryDate, processedReportsCount);
 
-        // Insertar los reportes en la base de datos
         logger.info("[INFO] Inserting reports into the database...");
         reportCollector.getReports().forEach(report -> {
             boolean success = reportService.saveReport(report);
