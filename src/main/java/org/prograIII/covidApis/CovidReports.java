@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 public class CovidReports {
 
     private static final String BASE_API_URL = "https://covid-19-statistics.p.rapidapi.com/reports?date=";
-    private static final String API_KEY = "2505eda46amshc60713983b5e807p1da25ajsn36febcbf4a71";
+    private static final String API_KEY = "c4ae6aed99msh12f7bbc9de01c3bp114255jsn150e433516a6";
     private static final String API_HOST = "covid-19-statistics.p.rapidapi.com";
     private static final Logger logger = LogManager.getLogger(CovidReports.class);
 

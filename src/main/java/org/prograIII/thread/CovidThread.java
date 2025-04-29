@@ -1,29 +1,34 @@
 package org.prograIII.thread;
 
-import org.prograIII.covidApis.CovidReports;
-import org.prograIII.util.RegionLoader;
+import org.prograIII.collectors.ExecutionCollector;
+import org.prograIII.collectors.ProvinceCollector;
+import org.prograIII.collectors.ReportCollector;
 import org.prograIII.covidApis.CovidProvinces;
-import org.prograIII.util.ProvinceLoader;
-import org.prograIII.util.ReportLoader;
-import org.prograIII.db.dao.RegionDao;
-import org.prograIII.db.dao.ReportDao;
+import org.prograIII.covidApis.CovidReports;
+import org.prograIII.db.model.ExecutionModel;
 import org.prograIII.db.model.RegionModel;
-import org.prograIII.db.model.ProvinceModel;
-import org.prograIII.db.model.ReportModel;
+import org.prograIII.db.service.ExecutionService;
 import org.prograIII.db.service.ProvinceService;
-import org.springframework.stereotype.Component;
+import org.prograIII.db.service.RegionService;
+import org.prograIII.db.service.ReportService;
+import org.prograIII.util.ProvinceLoader;
+import org.prograIII.util.RegionLoader;
+import org.prograIII.util.ReportLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@Component
 public class CovidThread implements Runnable {
 
-    private static final RegionDao regionDao = new RegionDao();
-    private static final ProvinceService provinceService = new ProvinceService();
-    private static final ReportDao reportDao = new ReportDao();
     private static final Logger logger = LogManager.getLogger(CovidThread.class);
+    private final ProvinceService provinceService = new ProvinceService();
+    private final ReportService reportService = new ReportService();
+    private final ExecutionService executionService = new ExecutionService();
+    private final RegionService regionService = new RegionService();
 
     @Override
     public void run() {
@@ -33,68 +38,126 @@ public class CovidThread implements Runnable {
 
             if (regions.isEmpty()) {
                 logger.info("[INFO] No regions found.");
-            } else {
-                regions.forEach((index, data) ->
-                        logger.info("{} => ISO: {}, Name: {}", index, data.get("iso"), data.get("name"))
-                );
-                insertRegionsToDatabase(regions);
+                return;
             }
 
+            // Obtener todos los registros existentes en executed_reports
+            List<ExecutionModel> existingExecutions = executionService.getAllExecutions();
+            Set<String> existingIsoDatePairs = new HashSet<>();
+            for (ExecutionModel execution : existingExecutions) {
+                existingIsoDatePairs.add(execution.getCountryIso() + "|" + execution.getExecutionDate());
+            }
+
+            // Fecha que se usará para los reportes
+            String queryDate = "2021-03-09";
+
+            // Filtrar ISOs que ya existen con la misma fecha
+            Set<String> isoSet = new HashSet<>();
+            for (Map<String, String> values : regions.values()) {
+                String iso = values.get("iso");
+                String name = values.get("name");
+                if (iso != null && !iso.isBlank()) {
+                    String isoDatePair = iso + "|" + queryDate;
+                    if (existingIsoDatePairs.contains(isoDatePair)) {
+                        logger.info("[INFO] ISO '{}' omitted because it already exists with date '{}'.", iso, queryDate);
+                    } else {
+                        isoSet.add(iso);
+                        logger.info("[INFO] ISO '{}' will be processed.", iso);
+
+                        // Insertar en la tabla regions
+                        RegionModel region = new RegionModel(0, iso, name);
+                        boolean regionInserted = regionService.saveRegion(region);
+                        if (regionInserted) {
+                            logger.info("[INFO] Region inserted: {}", region);
+                        } else {
+                            logger.error("[ERROR] Could not insert region: {}", region);
+                        }
+
+                        // Guardar inmediatamente en executed_reports
+                        ExecutionModel execution = new ExecutionModel(queryDate, iso);
+                        boolean executionInserted = executionService.saveExecution(execution);
+                        if (executionInserted) {
+                            logger.info("[INFO] Execution record inserted for ISO: {}", iso);
+                        } else {
+                            logger.error("[ERROR] Could not insert execution record for ISO: {}", iso);
+                        }
+                    }
+                }
+            }
+
+            if (isoSet.isEmpty()) {
+                logger.info("[INFO] No new ISOs to process.");
+                return;
+            }
+
+            // Procesar provincias
+            logger.info("[INFO] Fetching provinces from API...");
             CovidProvinces service = new CovidProvinces();
             Map<String, List<ProvinceLoader>> allData = service.fetchAllRegionData();
-            allData.forEach((iso, regionList) -> {
-                logger.info("ISO: {}", iso);
-                for (ProvinceLoader info : regionList) {
-                    logger.info("  - {}", info);
+            logger.info("[INFO] Finished fetching provinces.");
 
-                    ProvinceModel province = new ProvinceModel(
-                            info.getIso(),
-                            info.getProvince(),
-                            info.getName(),
-                            info.getLat(),
-                            info.getLng()
-                    );
-
-                    boolean success = provinceService.saveProvince(province);
-                    if (success) {
-                        logger.info("[INFO] Province inserted: {}", info.getProvince());
-                    } else {
-                        logger.error("[ERROR] Could not insert province: {}", info.getProvince());
-                    }
+            ProvinceCollector provinceCollector = new ProvinceCollector();
+            isoSet.forEach(iso -> {
+                logger.info("[INFO] Processing provinces for ISO: {}", iso);
+                List<ProvinceLoader> regionList = allData.get(iso);
+                if (regionList != null) {
+                    regionList.forEach(provinceCollector::collect);
                 }
             });
 
-            logger.info("[INFO] Starting to retrieve COVID data...");
-            Set<String> isoSet = getIsoSetFromRegionLoader(regions);
-            String queryDate = "2022-03-09";
+            logger.info("[INFO] Inserting provinces into the database...");
+            provinceCollector.getProvinces().forEach(province -> {
+                boolean success = provinceService.saveProvince(province);
+                if (success) {
+                    logger.info("[INFO] Province inserted: {}", province.getProvince());
+                } else {
+                    logger.error("[ERROR] Could not insert province: {}", province.getProvince());
+                }
+            });
+            logger.info("[INFO] Finished inserting provinces.");
 
+            // Procesar reportes
+            logger.info("[INFO] Fetching COVID reports from API...");
             CovidReports covidReportsService = new CovidReports();
             Map<String, List<ReportLoader>> covidReports = covidReportsService.fetchCovidDataForAllProvinces(isoSet, queryDate);
+            logger.info("[INFO] Finished fetching COVID reports.");
 
+            if (covidReports.isEmpty()) {
+                logger.info("[INFO] No reports found for the given ISOs and date.");
+                return;
+            }
+
+            ReportCollector reportCollector = new ReportCollector();
             covidReports.forEach((iso, reportList) -> {
-                logger.info("ISO: {}", iso);
-                for (ReportLoader report : reportList) {
-                    logger.info("  - {}", report);
+                logger.info("[INFO] Processing reports for ISO: {}", iso);
+                reportList.forEach(reportCollector::collect);
+            });
 
-                    ReportModel reportModel = new ReportModel(
-                            0,
-                            report.getDate(),
-                            report.getConfirmed(),
-                            report.getDeaths(),
-                            report.getRecovered(),
-                            report.getIso(),
-                            report.getRegionName(),
-                            report.getProvince()
-                    );
-
-                    boolean reportSuccess = reportDao.save(reportModel);
-                    if (reportSuccess) {
-                        logger.info("[INFO] Report inserted into the database: {}", report);
-                    } else {
-                        logger.error("[ERROR] Could not insert the report: {}", report);
-                    }
+            logger.info("[INFO] Inserting reports into the database...");
+            reportCollector.getReports().forEach(report -> {
+                boolean reportSuccess = reportService.saveReport(report);
+                if (reportSuccess) {
+                    logger.info("[INFO] Report inserted into the database: {}", report);
+                } else {
+                    logger.error("[ERROR] Could not insert the report: {}", report);
                 }
             });
+            logger.info("[INFO] Finished inserting reports.");
+
+            // Guardar datos de ejecución
+            logger.info("[INFO] Saving execution data...");
+            ExecutionCollector executionCollector = new ExecutionCollector();
+            executionCollector.collect(isoSet, queryDate);
+
+            executionCollector.getExecutions().forEach(execution -> {
+                boolean executionSuccess = executionService.saveExecution(execution);
+                if (executionSuccess) {
+                    logger.info("[INFO] Execution data inserted: {}", execution);
+                } else {
+                    logger.error("[ERROR] Could not insert execution data: {}", execution);
+                }
+            });
+            logger.info("[INFO] Finished saving execution data.");
 
             logger.info("[INFO] Query finished for date: {}", queryDate);
 
@@ -103,39 +166,11 @@ public class CovidThread implements Runnable {
         }
     }
 
-    private static Set<String> getIsoSetFromRegionLoader(Map<Integer, Map<String, String>> regions) {
-        Set<String> isoSet = new HashSet<>();
-        for (Map<String, String> values : regions.values()) {
-            String iso = values.get("iso");
-            if (iso != null && !iso.isBlank()) {
-                isoSet.add(iso);
-            }
-        }
-        return isoSet;
-    }
-
-    private static void insertRegionsToDatabase(Map<Integer, Map<String, String>> regions) {
-        for (Map.Entry<Integer, Map<String, String>> entry : regions.entrySet()) {
-            Map<String, String> data = entry.getValue();
-            String iso = data.get("iso");
-            String name = data.get("name");
-
-            RegionModel region = new RegionModel(0, iso, name);
-            boolean success = regionDao.save(region);
-            if (success) {
-                logger.info("[INFO] Region inserted: {}", iso);
-            } else {
-                logger.error("[ERROR] Error inserting region: {}", iso);
-            }
-        }
-    }
-
-    // Method to start the thread with a 15-second delay
     public static void startThreadWithDelay() {
         try {
             logger.info("[INFO] Waiting 15 seconds before starting the thread...");
-            Thread.sleep(15000); // 15 seconds
-            new Thread(new CovidThread()).start(); // Start the thread after waiting
+            Thread.sleep(15000);
+            new Thread(new CovidThread()).start();
             logger.info("[INFO] Thread started.");
         } catch (InterruptedException e) {
             logger.error("[ERROR] Error waiting to start the thread: ", e);
