@@ -16,7 +16,8 @@ public class ReportQueryExecutor implements Runnable {
         this.iso = iso;
     }
 
-    // Executes the query to fetch reports by date and ISO, and prints them to the console
+    // Ejecuto la consulta para obtener informes por fecha e ISO, y los imprime en la consola
+
     @Override
     public void run() {
         ReportService service = new ReportService();

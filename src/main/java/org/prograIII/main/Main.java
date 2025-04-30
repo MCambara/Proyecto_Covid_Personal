@@ -39,7 +39,6 @@ public class Main {
             default:
                 logger.error("[ERROR] Invalid option.");
         }
-
         scanner.close();
     }
 }
