@@ -9,8 +9,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.prograIII.util.PropertyReader;
 
@@ -20,23 +21,20 @@ public class CovidProvinces {
     private static final String API_URL = PropertyReader.getCovidApiProvincesUrl();
     private static final String API_KEY = PropertyReader.getCovidApiKey();
     private static final String API_HOST = PropertyReader.getCovidApiHost();
+    private static final Logger logger = LogManager.getLogger(CovidProvinces.class);
 
     public Map<String, List<ProvinceLoader>> fetchAllRegionData() throws JSONException {
         Set<String> isoSet = getIsoSet();
         Map<String, List<ProvinceLoader>> regionDataMap = new HashMap<>();
 
-        int total = isoSet.size();
-        int count = 0;
+        logger.info("[INFO] Processing...");
 
         for (String iso : isoSet) {
-            count++;
-            System.out.println("[INFO] Processing ISO " + count + " of " + total + ": " + iso);
-
             JSONObject response = fetchDataByIso(iso);
             storeProvinceData(iso, response, regionDataMap);
         }
 
-        System.out.println("[INFO] Finished processing all ISOs.");
+        logger.info("[INFO] Finished processing all ISOs.");
         return regionDataMap;
     }
 
@@ -76,7 +74,7 @@ public class CovidProvinces {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("[ERROR] Exception for ISO {}: {}", iso, e.getMessage());
             return new JSONObject("{\"error\":\"Exception for ISO " + iso + "\"}");
         }
     }

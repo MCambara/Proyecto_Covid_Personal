@@ -2,6 +2,7 @@ package org.prograIII.processor;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.prograIII.collectors.RegionCollector;
 import org.prograIII.db.model.ExecutionModel;
 import org.prograIII.db.model.RegionModel;
 import org.prograIII.db.service.ExecutionService;
@@ -16,38 +17,42 @@ public class RegionProcessor {
     private final ExecutionService executionService = new ExecutionService();
     private final RegionService regionService = new RegionService();
 
-    // Procesa las regiones y devuelve un conjunto con los códigos ISO de las regiones a ser insertadas
+    // Procesa las regiones usando el collector y devuelve el conjunto de ISOs a insertar
     public Set<String> processRegions(String queryDate) {
-        Map<Integer, Map<String, String>> regions = RegionLoader.loadRegions();
+        Map<Integer, Map<String, String>> regionsMap = RegionLoader.loadRegions();
         Set<String> isoSet = new HashSet<>();
 
-        if (regions.isEmpty()) {
+        if (regionsMap.isEmpty()) {
             logger.info("[INFO] No regions found.");
             return isoSet;
         }
 
-        logger.info("[INFO] Processing {} regions for date '{}'.", regions.size(), queryDate);
+        logger.info("[INFO] Processing {} regions for date '{}'.", regionsMap.size(), queryDate);
 
+        // Cargar ejecuciones previas
         List<ExecutionModel> existingExecutions = executionService.getAllExecutions();
         Set<String> existingIsoDatePairs = new HashSet<>();
         for (ExecutionModel execution : existingExecutions) {
             existingIsoDatePairs.add(execution.getCountryIso() + "|" + execution.getExecutionDate());
         }
 
-        for (Map<String, String> values : regions.values()) {
-            String iso = values.get("iso");
-            String name = values.get("name");
-            if (iso != null && !iso.isBlank()) {
-                String isoDatePair = iso + "|" + queryDate;
-                if (existingIsoDatePairs.contains(isoDatePair)) {
-                    logger.info("[INFO] ISO '{}' omitted because it already exists with date '{}'.", iso, queryDate);
-                } else {
-                    logger.info("[INFO] ISO '{}' will be processed and saved for date '{}'.", iso, queryDate);
-                    isoSet.add(iso);
-                    RegionModel region = new RegionModel(0, iso, name);
-                    boolean regionInserted = regionService.saveRegion(region);
-                    logger.info(regionInserted ? "[INFO] Region inserted: {}" : "[INFO] Region already exists or could not be inserted: {}", region);
-                }
+        // Recolectar regiones usando el collector
+        RegionCollector collector = new RegionCollector();
+        collector.collect(regionsMap);
+        LinkedList<RegionModel> regionList = collector.getRegions();
+
+        for (RegionModel region : regionList) {
+            String iso = region.getIso();
+            String name = region.getName();
+            String isoDatePair = iso + "|" + queryDate;
+
+            if (existingIsoDatePairs.contains(isoDatePair)) {
+                logger.info("[INFO] ISO '{}' omitted because it already exists with date '{}'.", iso, queryDate);
+            } else {
+                logger.info("[INFO] ISO '{}' will be processed and saved for date '{}'.", iso, queryDate);
+                isoSet.add(iso);
+                boolean inserted = regionService.saveRegion(new RegionModel(0, iso, name));
+                logger.info(inserted ? "[INFO] Region inserted: {}" : "[INFO] Region already exists or could not be inserted: {}", region);
             }
         }
 

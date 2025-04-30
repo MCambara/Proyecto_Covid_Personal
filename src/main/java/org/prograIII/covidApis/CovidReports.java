@@ -23,6 +23,8 @@ public class CovidReports {
         Map<String, List<ReportLoader>> covidDataMap = new HashMap<>();
         int counter = 0;
 
+        logger.info("[INFO] Processing...");
+
         for (String iso : isoSet) {
             try {
                 JSONObject response = fetchDataByIso(iso, date);
