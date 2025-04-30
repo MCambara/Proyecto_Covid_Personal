@@ -16,7 +16,7 @@ public class ReportQueryExecutor implements Runnable {
         this.iso = iso;
     }
 
-    // Ejecuto la consulta para obtener informes por fecha e ISO, y los imprime en la consola
+    // Ejecuta la consulta para recuperar los reportes por fecha e ISO, luego imprímelos en la consola
 
     @Override
     public void run() {
@@ -24,16 +24,17 @@ public class ReportQueryExecutor implements Runnable {
 
         TreeMap<String, ReportModel> reports = service.getReportsByDateAndIso(date, iso);
 
-        System.out.printf("%-30s %-10s %-12s %-12s %-12s %-15s %-20s\n",
-                "Province", "ISO", "Date", "Confirmed", "Deaths", "Recovered", "Region");
+        System.out.printf("%-5s %-30s %-10s %-12s %-12s %-12s %-15s %-20s\n",
+                "No.", "Province", "ISO", "Date", "Confirmed", "Deaths", "Recovered", "Region");
 
         if (reports.isEmpty()) {
             System.out.println("No reports found for date " + date + " and ISO " + iso);
         } else {
-
+            int index = 1;
             for (Map.Entry<String, ReportModel> entry : reports.entrySet()) {
                 ReportModel report = entry.getValue();
-                System.out.printf("%-30s %-10s %-12s %-12d %-12d %-15d %-20s\n",
+                System.out.printf("%-5d %-30s %-10s %-12s %-12d %-12d %-15d %-20s\n",
+                        index++,
                         entry.getKey(),
                         iso,
                         date,
@@ -42,6 +43,7 @@ public class ReportQueryExecutor implements Runnable {
                         report.getRecovered(),
                         report.getRegionName());
             }
+            System.out.println("\nTotal records: " + (index - 1));
         }
     }
 }
