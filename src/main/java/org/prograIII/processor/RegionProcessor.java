@@ -16,6 +16,7 @@ public class RegionProcessor {
     private final ExecutionService executionService = new ExecutionService();
     private final RegionService regionService = new RegionService();
 
+    // Procesa las regiones y devuelve un conjunto con los códigos ISO de las regiones a ser insertadas
     public Set<String> processRegions(String queryDate) {
         Map<Integer, Map<String, String>> regions = RegionLoader.loadRegions();
         Set<String> isoSet = new HashSet<>();
@@ -45,7 +46,7 @@ public class RegionProcessor {
                     isoSet.add(iso);
                     RegionModel region = new RegionModel(0, iso, name);
                     boolean regionInserted = regionService.saveRegion(region);
-                    logger.info(regionInserted ? "[INFO] Region inserted: {}" : "[ERROR] Could not insert region: {}", region);
+                    logger.info(regionInserted ? "[INFO] Region inserted: {}" : "[INFO] Region already exists or could not be inserted: {}", region);
                 }
             }
         }

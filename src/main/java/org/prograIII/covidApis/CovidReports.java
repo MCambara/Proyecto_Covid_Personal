@@ -10,15 +10,15 @@ import java.net.URL;
 import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.prograIII.util.PropertyReader;
 
 public class CovidReports {
 
-    private static final String BASE_API_URL = "https://covid-19-statistics.p.rapidapi.com/reports?date=";
-    private static final String API_KEY = "c4ae6aed99msh12f7bbc9de01c3bp114255jsn150e433516a6";
-    private static final String API_HOST = "covid-19-statistics.p.rapidapi.com";
+    private static final String BASE_API_URL = PropertyReader.getCovidApiReportsUrl();
+    private static final String API_KEY = PropertyReader.getCovidApiKey();
+    private static final String API_HOST = PropertyReader.getCovidApiHost();
     private static final Logger logger = LogManager.getLogger(CovidReports.class);
 
-    // Now receives the date as a parameter
     public Map<String, List<ReportLoader>> fetchCovidDataForAllProvinces(Set<String> isoSet, String date) {
         Map<String, List<ReportLoader>> covidDataMap = new HashMap<>();
         int counter = 0;
@@ -38,7 +38,6 @@ public class CovidReports {
         return covidDataMap;
     }
 
-    // Receives the date as a parameter
     private JSONObject fetchDataByIso(String iso, String date) {
         try {
             String fullUrl = BASE_API_URL + date + "&iso=" + iso;

@@ -1,14 +1,13 @@
 package org.prograIII.db.model;
 
 public class ProvinceModel {
-    private int id; // Autoincremental, no se necesita en el constructor
+    private int id;
     private String iso;
     private String province;
     private String name;
     private double lat;
     private double lng;
 
-    // Constructor sin el campo id
     public ProvinceModel(String iso, String province, String name, double lat, double lng) {
         this.iso = iso;
         this.province = province;
@@ -17,7 +16,6 @@ public class ProvinceModel {
         this.lng = lng;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }

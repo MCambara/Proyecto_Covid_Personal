@@ -5,14 +5,12 @@ public class RegionModel {
     private String iso;
     private String name;
 
-    // Constructor
     public RegionModel(int id, String iso, String name) {
         this.id = id;
         this.iso = iso;
         this.name = name;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }

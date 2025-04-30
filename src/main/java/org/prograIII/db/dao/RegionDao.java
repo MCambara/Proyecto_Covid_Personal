@@ -8,15 +8,12 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Repository
 public class RegionDao {
 
     private static final Logger logger = LogManager.getLogger(RegionDao.class);
 
-    // Guardar una región
     public boolean save(RegionModel region) {
         String query = "INSERT INTO regions (iso, name) VALUES (?, ?)";
         try (Connection connection = DatabaseConnection.getConnection();
@@ -32,7 +29,6 @@ public class RegionDao {
         }
     }
 
-    // Obtener todas las regiones
     public List<RegionModel> getAll() {
         List<RegionModel> regions = new ArrayList<>();
         String query = "SELECT * FROM regions";
@@ -54,7 +50,6 @@ public class RegionDao {
         return regions;
     }
 
-    // Obtener una región por ID
     public RegionModel getById(int id) {
         RegionModel region = null;
         String query = "SELECT * FROM regions WHERE id = ?";
@@ -76,4 +71,24 @@ public class RegionDao {
         }
         return region;
     }
+
+    public boolean exists(RegionModel region) {
+        String query = "SELECT COUNT(*) FROM regions WHERE iso = ? AND name = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+
+            stmt.setString(1, region.getIso());
+            stmt.setString(2, region.getName());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return false;
+    }
+
 }

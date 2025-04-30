@@ -59,7 +59,6 @@ public class ReportDao {
                         rs.getString("province")
                 );
 
-                // Usamos provincia como clave para eliminar duplicados automáticamente
                 reportsMap.put(report.getProvince(), report);
             }
         } catch (Exception e) {
@@ -67,6 +66,30 @@ public class ReportDao {
         }
 
         return reportsMap;
+    }
+
+    public boolean exists(ReportModel report) {
+        String sql = "SELECT COUNT(*) FROM covid_reports WHERE date = ? AND confirmed = ? AND deaths = ? AND recovered = ? AND iso = ? AND region_name = ? AND province = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, report.getDate());
+            stmt.setInt(2, report.getConfirmed());
+            stmt.setInt(3, report.getDeaths());
+            stmt.setInt(4, report.getRecovered());
+            stmt.setString(5, report.getIso());
+            stmt.setString(6, report.getRegionName());
+            stmt.setString(7, report.getProvince());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("[ERROR] Error checking report existence: {}", e.getMessage());
+        }
+        return false;
     }
 
 }

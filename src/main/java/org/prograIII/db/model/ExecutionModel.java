@@ -4,13 +4,13 @@ public class ExecutionModel {
     private String executionDate;
     private String countryIso;
 
-    // Constructor
+
     public ExecutionModel(String executionDate, String countryIso) {
         this.executionDate = executionDate;
         this.countryIso = countryIso;
     }
 
-    // Getters y Setters
+
     public String getExecutionDate() {
         return executionDate;
     }

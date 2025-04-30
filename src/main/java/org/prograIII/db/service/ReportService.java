@@ -12,9 +12,11 @@ public class ReportService {
         this.reportDao = new ReportDao();
     }
 
-    // Guardar un reporte
     public boolean saveReport(ReportModel report) {
-        return reportDao.save(report);
+        if (!reportDao.exists(report)) {
+            return reportDao.save(report);
+        }
+        return false;
     }
 
     public TreeMap<String, ReportModel> getReportsByDateAndIso(String date, String iso) {

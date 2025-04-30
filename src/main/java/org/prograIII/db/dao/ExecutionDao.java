@@ -16,7 +16,6 @@ public class ExecutionDao {
 
     private static final Logger logger = LogManager.getLogger(ExecutionDao.class);
 
-    // Método para insertar un registro
     public boolean save(ExecutionModel execution) {
         String sql = "INSERT INTO executed_reports (execution_date, country_iso) VALUES (?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -32,7 +31,6 @@ public class ExecutionDao {
         }
     }
 
-    // Método para obtener todos los registros
     public List<ExecutionModel> getAll() {
         List<ExecutionModel> executions = new ArrayList<>();
         String sql = "SELECT * FROM executed_reports";

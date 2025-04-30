@@ -6,15 +6,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
 import org.springframework.stereotype.Component;
+import org.prograIII.util.PropertyReader;
 
 @Component
 public class CovidRegions {
 
     private static final Logger logger = Logger.getLogger(CovidRegions.class.getName());
 
-    private static final String API_URL = "https://covid-19-statistics.p.rapidapi.com/regions";
-    private static final String API_KEY = "c4ae6aed99msh12f7bbc9de01c3bp114255jsn150e433516a6";
-    private static final String API_HOST = "covid-19-statistics.p.rapidapi.com";
+    private static final String API_URL = PropertyReader.getCovidApiRegionsUrl();
+    private static final String API_KEY = PropertyReader.getCovidApiKey();
+    private static final String API_HOST = PropertyReader.getCovidApiHost();
 
     public String fetchRegionJson() {
         try {

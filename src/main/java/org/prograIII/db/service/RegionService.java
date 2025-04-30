@@ -11,17 +11,17 @@ public class RegionService {
         this.regionDao = new RegionDao();
     }
 
-    // Guardar una región
     public boolean saveRegion(RegionModel region) {
-        return regionDao.save(region);
+        if (!regionDao.exists(region)) {
+            return regionDao.save(region);
+        }
+        return false;
     }
 
-    // Obtener todas las regiones
     public List<RegionModel> getAllRegions() {
         return regionDao.getAll();
     }
 
-    // Obtener una región por ID
     public RegionModel getRegionById(int id) {
         return regionDao.getById(id);
     }

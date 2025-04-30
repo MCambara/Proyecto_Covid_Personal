@@ -6,6 +6,7 @@ import org.prograIII.processor.ExecutionProcessor;
 import org.prograIII.processor.ProvinceProcessor;
 import org.prograIII.processor.RegionProcessor;
 import org.prograIII.processor.ReportProcessor;
+import org.prograIII.util.PropertyReader;
 
 import java.util.Set;
 
@@ -13,13 +14,15 @@ public class CovidThread implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(CovidThread.class);
 
+    // Ejecuta el procesamiento de regiones, provincias, reportes y ejecuciones para una fecha específica
     @Override
     public void run() {
         try {
-            String queryDate = "2022-03-09";
+            String queryDate = PropertyReader.getCovidApiTargetDate();
 
             logger.info("[INFO] Starting processing for date: {}", queryDate);
 
+            // Procesa las regiones para la fecha indicada y obtiene los ISOs a procesar
             RegionProcessor regionProcessor = new RegionProcessor();
             Set<String> newIsos = regionProcessor.processRegions(queryDate);
 
@@ -28,12 +31,15 @@ public class CovidThread implements Runnable {
                 return;
             }
 
+            // Procesa las provincias para los ISOs obtenidos
             ProvinceProcessor provinceProcessor = new ProvinceProcessor();
             provinceProcessor.processProvinces(newIsos);
 
+            // Procesa los reportes para los ISOs y la fecha indicada
             ReportProcessor reportProcessor = new ReportProcessor();
             reportProcessor.processReports(newIsos, queryDate);
 
+            // Procesa las ejecuciones para los ISOs y la fecha indicada
             ExecutionProcessor executionProcessor = new ExecutionProcessor();
             executionProcessor.processExecutions(newIsos, queryDate);
 

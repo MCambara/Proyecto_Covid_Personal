@@ -16,6 +16,7 @@ public class ProvinceProcessor {
     private static final Logger logger = LogManager.getLogger(ProvinceProcessor.class);
     private final ProvinceService provinceService = new ProvinceService();
 
+    // Método para procesar provincias obtenidas de la API
     public void processProvinces(Set<String> isoSet) {
         logger.info("[INFO] Fetching provinces from API...");
         CovidProvinces service = new CovidProvinces();
@@ -26,6 +27,7 @@ public class ProvinceProcessor {
 
         int totalProvincesCount = 0;
 
+        // Recorre todos los ISOs y procesa sus provincias
         for (String iso : isoSet) {
             List<ProvinceLoader> regionList = allData.get(iso);
             if (regionList != null && !regionList.isEmpty()) {
@@ -42,10 +44,11 @@ public class ProvinceProcessor {
 
         logger.info("[INFO] Total provinces processed: {}", totalProvincesCount);
 
+        // Guarda las provincias procesadas en la base de datos
         logger.info("[INFO] Inserting provinces into the database...");
         provinceCollector.getProvinces().forEach(province -> {
             boolean success = provinceService.saveProvince(province);
-            logger.info(success ? "[INFO] Province inserted: {}" : "[ERROR] Could not insert province: {}", province.getProvince());
+            logger.info(success ? "[INFO] Province inserted: {}" : "[INFO] Province already exists or could not be inserted: {}", province.getProvince());
         });
 
         logger.info("[INFO] Finished inserting provinces.");

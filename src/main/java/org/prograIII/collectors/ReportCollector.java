@@ -8,9 +8,10 @@ import java.util.LinkedList;
 public class ReportCollector {
     private final LinkedList<ReportModel> reports = new LinkedList<>();
 
+    // Convierte los datos del loader en un modelo de reporte y lo guarda en la lista
     public void collect(ReportLoader loader) {
         ReportModel report = new ReportModel(
-                0, // ID inicializado en 0
+                0,
                 loader.getDate(),
                 loader.getConfirmed(),
                 loader.getDeaths(),
@@ -22,6 +23,7 @@ public class ReportCollector {
         reports.add(report);
     }
 
+    // Devuelve todos los reportes que se han ido recolectando
     public LinkedList<ReportModel> getReports() {
         return reports;
     }

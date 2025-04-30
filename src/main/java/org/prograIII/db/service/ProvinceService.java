@@ -10,8 +10,11 @@ public class ProvinceService {
         this.provinceDao = new ProvinceDao();
     }
 
-    // Guardar una provincia
     public boolean saveProvince(ProvinceModel province) {
-        return provinceDao.save(province);
+        if (!provinceDao.exists(province)) {
+            return provinceDao.save(province);
+        }
+        return false;
     }
+
 }

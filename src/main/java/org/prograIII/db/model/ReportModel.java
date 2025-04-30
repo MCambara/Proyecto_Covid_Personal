@@ -1,7 +1,7 @@
 package org.prograIII.db.model;
 
 public class ReportModel {
-    private int id; // Este se generará automáticamente en la base de datos
+    private int id;
     private String date;
     private int confirmed;
     private int deaths;
@@ -10,7 +10,6 @@ public class ReportModel {
     private String regionName;
     private String province;
 
-    // Constructor sin ID (para insertar un nuevo reporte)
     public ReportModel(String date, int confirmed, int deaths, int recovered, String iso, String regionName, String province) {
         this.date = date;
         this.confirmed = confirmed;
@@ -21,7 +20,6 @@ public class ReportModel {
         this.province = province;
     }
 
-    // Constructor con ID (para cuando se obtienen los datos de la base de datos)
     public ReportModel(int id, String date, int confirmed, int deaths, int recovered, String iso, String regionName, String province) {
         this.id = id;
         this.date = date;

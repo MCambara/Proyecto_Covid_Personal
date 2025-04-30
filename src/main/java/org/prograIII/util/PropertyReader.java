@@ -23,24 +23,17 @@ public class PropertyReader {
         return props.getProperty(key);
     }
 
-    // Method to get the database URL
+
     public static String getDbUrl() {
         return getProperty("db.url");
     }
 
-    // Method to get the database username
     public static String getDbUsername() {
         return getProperty("db.username");
     }
 
-    // Method to get the database password
     public static String getDbPassword() {
         return getProperty("db.password");
-    }
-
-    // Methods for COVID API configuration
-    public static String getCovidApiBaseUrl() {
-        return getProperty("covid.api.base-url");
     }
 
     public static String getCovidApiKey() {
@@ -51,17 +44,37 @@ public class PropertyReader {
         return getProperty("covid.api.host");
     }
 
-    // Methods for application parameters
+    public static String getCovidApiRegionsUrl() {
+        return getProperty("covid.api.regions-url");
+    }
+
+    public static String getCovidApiProvincesUrl() {
+        return getProperty("covid.api.provinces-url");
+    }
+
+    public static String getCovidApiReportsUrl() {
+        return getProperty("covid.api.reports-url");
+    }
+
+    public static String getCovidApiTargetDate() {
+        return getProperty("covid.api.target-date");
+    }
+
+
     public static String getAppInitialDelay() {
         return getProperty("app.initial-delay");
     }
 
-    public static String getAppTargetDate() {
-        return getProperty("app.target-date");
-    }
 
-    // Method to get the logging level
     public static String getLoggingLevel() {
         return getProperty("logging.level.org.prograIII");
+    }
+
+    public static String getCovidQueryDate() {
+        return getProperty("covid.report.date");
+    }
+
+    public static String getCovidIso() {
+        return getProperty("covid.iso");
     }
 }

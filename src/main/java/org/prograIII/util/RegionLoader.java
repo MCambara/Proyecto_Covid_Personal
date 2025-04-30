@@ -31,7 +31,6 @@ public class RegionLoader {
 
         return regionMap;
     }
-    // Clases internas para deserialización
     static class ApiResponse {
         List<Region> data;
     }

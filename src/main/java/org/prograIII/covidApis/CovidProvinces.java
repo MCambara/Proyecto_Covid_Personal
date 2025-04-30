@@ -12,27 +12,34 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.*;
 import org.springframework.stereotype.Component;
+import org.prograIII.util.PropertyReader;
 
 @Component
 public class CovidProvinces {
 
-    private static final String API_URL = "https://covid-19-statistics.p.rapidapi.com/provinces?iso=";
-    private static final String API_KEY = "c4ae6aed99msh12f7bbc9de01c3bp114255jsn150e433516a6";
-    private static final String API_HOST = "covid-19-statistics.p.rapidapi.com";
+    private static final String API_URL = PropertyReader.getCovidApiProvincesUrl();
+    private static final String API_KEY = PropertyReader.getCovidApiKey();
+    private static final String API_HOST = PropertyReader.getCovidApiHost();
 
-    //metodo que llamamos en main para llamar a la api, guardar los datos en una mapa, y mostrar toda la informacion
     public Map<String, List<ProvinceLoader>> fetchAllRegionData() throws JSONException {
         Set<String> isoSet = getIsoSet();
         Map<String, List<ProvinceLoader>> regionDataMap = new HashMap<>();
+
+        int total = isoSet.size();
+        int count = 0;
+
         for (String iso : isoSet) {
+            count++;
+            System.out.println("[INFO] Processing ISO " + count + " of " + total + ": " + iso);
+
             JSONObject response = fetchDataByIso(iso);
             storeProvinceData(iso, response, regionDataMap);
         }
 
+        System.out.println("[INFO] Finished processing all ISOs.");
         return regionDataMap;
     }
 
-    //llamamos la primera api para obtener un set de iso
     private Set<String> getIsoSet() {
         Map<Integer, Map<String, String>> regions = RegionLoader.loadRegions();
         Set<String> isoSet = new HashSet<>();
@@ -47,7 +54,6 @@ public class CovidProvinces {
         return isoSet;
     }
 
-    //obtenemos los datos de cada iso
     private JSONObject fetchDataByIso(String iso) throws JSONException {
         try {
             URL url = new URL(API_URL + iso);
@@ -75,7 +81,6 @@ public class CovidProvinces {
         }
     }
 
-    //guardamos los datos obtenidos en una lista de la clase ProvinceLoader
     private void storeProvinceData(String iso, JSONObject response, Map<String, List<ProvinceLoader>> dataMap) throws JSONException {
         JSONArray dataArray = response.optJSONArray("data");
         if (dataArray == null) return;

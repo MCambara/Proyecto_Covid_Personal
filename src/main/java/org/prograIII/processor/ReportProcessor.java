@@ -16,6 +16,7 @@ public class ReportProcessor {
     private static final Logger logger = LogManager.getLogger(ReportProcessor.class);
     private final ReportService reportService = new ReportService();
 
+    // Procesa los reportes COVID obtenidos de la API y los guarda en la base de datos
     public void processReports(Set<String> isoSet, String queryDate) {
         logger.info("[INFO] Fetching COVID reports from API...");
         CovidReports covidReportsService = new CovidReports();
@@ -29,24 +30,31 @@ public class ReportProcessor {
 
         ReportCollector reportCollector = new ReportCollector();
 
-        int processedReportsCount = 0;
+        int totalReportsFetched = 0;
 
         for (Map.Entry<String, List<ReportLoader>> entry : covidReports.entrySet()) {
             String iso = entry.getKey();
             List<ReportLoader> reportList = entry.getValue();
 
             logger.info("[INFO] Processing reports for ISO: {} on date: {}", iso, queryDate);
-            processedReportsCount += reportList.size();
 
-            reportList.forEach(reportCollector::collect);
+            int reportsProcessedForIso = 0;
+
+            for (ReportLoader report : reportList) {
+                reportCollector.collect(report);
+                reportsProcessedForIso++;
+            }
+
+            logger.info("[INFO] Finished processing {} reports for ISO: {} on date: {}", reportsProcessedForIso, iso, queryDate);
+            totalReportsFetched += reportsProcessedForIso;
         }
 
-        logger.info("[INFO] Total reports fetched for date '{}': {}", queryDate, processedReportsCount);
+        logger.info("[INFO] Total reports fetched for date '{}': {}", queryDate, totalReportsFetched);
 
         logger.info("[INFO] Inserting reports into the database...");
         reportCollector.getReports().forEach(report -> {
             boolean success = reportService.saveReport(report);
-            logger.info(success ? "[INFO] Report inserted: {}" : "[ERROR] Could not insert report: {}", report);
+            logger.info(success ? "[INFO] Report inserted: {}" : "[INFO] Report already exists or could not be inserted: {}", report);
         });
 
         logger.info("[INFO] Finished inserting reports.");

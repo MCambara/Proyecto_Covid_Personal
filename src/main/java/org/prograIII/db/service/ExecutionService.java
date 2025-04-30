@@ -12,12 +12,10 @@ public class ExecutionService {
         this.executionDao = new ExecutionDao();
     }
 
-    // Guardar un registro
     public boolean saveExecution(ExecutionModel execution) {
         return executionDao.save(execution);
     }
 
-    // Obtener todos los registros
     public List<ExecutionModel> getAllExecutions() {
         return executionDao.getAll();
     }
