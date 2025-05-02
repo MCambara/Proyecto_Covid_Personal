@@ -6,7 +6,6 @@ import org.prograIII.collectors.ProvinceCollector;
 import org.prograIII.covidApis.CovidProvinces;
 import org.prograIII.db.service.ProvinceService;
 import org.prograIII.util.ProvinceLoader;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

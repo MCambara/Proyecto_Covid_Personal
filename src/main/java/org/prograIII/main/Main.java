@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.prograIII.thread.CovidThread;
 import org.prograIII.util.PropertyReader;
 import org.prograIII.thread.ReportQueryExecutor;
-
 import java.util.Scanner;
 
 public class Main {
@@ -21,7 +20,7 @@ public class Main {
         logger.info("Select an option:");
         logger.info("1. Insert data using the thread.");
         logger.info("2. Show existing data by ISO and date.");
-        System.out.print("Option: ");
+        System.out.print("Option: ");   
 
         int option = scanner.nextInt();
         scanner.nextLine();

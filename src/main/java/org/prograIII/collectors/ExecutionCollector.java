@@ -1,7 +1,6 @@
 package org.prograIII.collectors;
 
 import org.prograIII.db.model.ExecutionModel;
-
 import java.util.LinkedList;
 import java.util.Set;
 

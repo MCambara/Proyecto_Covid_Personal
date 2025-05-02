@@ -6,7 +6,6 @@ import org.prograIII.collectors.ReportCollector;
 import org.prograIII.covidApis.CovidReports;
 import org.prograIII.db.service.ReportService;
 import org.prograIII.util.ReportLoader;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

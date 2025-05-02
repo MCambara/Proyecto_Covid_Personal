@@ -2,7 +2,6 @@ package org.prograIII.collectors;
 
 import org.prograIII.db.model.ReportModel;
 import org.prograIII.util.ReportLoader;
-
 import java.util.LinkedList;
 
 public class ReportCollector {

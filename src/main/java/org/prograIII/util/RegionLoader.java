@@ -2,7 +2,6 @@ package org.prograIII.util;
 
 import com.google.gson.reflect.TypeToken;
 import org.prograIII.covidApis.CovidRegions;
-
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;

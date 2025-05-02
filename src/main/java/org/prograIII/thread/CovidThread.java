@@ -7,7 +7,6 @@ import org.prograIII.processor.ProvinceProcessor;
 import org.prograIII.processor.RegionProcessor;
 import org.prograIII.processor.ReportProcessor;
 import org.prograIII.util.PropertyReader;
-
 import java.util.Set;
 
 public class CovidThread implements Runnable {

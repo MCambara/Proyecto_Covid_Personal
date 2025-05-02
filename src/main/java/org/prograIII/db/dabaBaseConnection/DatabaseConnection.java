@@ -1,7 +1,6 @@
 package org.prograIII.db.dabaBaseConnection;
 
 import org.prograIII.util.PropertyReader;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

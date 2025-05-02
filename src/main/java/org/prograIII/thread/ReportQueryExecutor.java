@@ -2,7 +2,6 @@ package org.prograIII.thread;
 
 import org.prograIII.db.model.ReportModel;
 import org.prograIII.db.service.ReportService;
-
 import java.util.Map;
 import java.util.TreeMap;
 

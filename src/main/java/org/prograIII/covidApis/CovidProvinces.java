@@ -12,10 +12,8 @@ import java.net.URL;
 import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 import org.prograIII.util.PropertyReader;
 
-@Component
 public class CovidProvinces {
 
     private static final String API_URL = PropertyReader.getCovidApiProvincesUrl();

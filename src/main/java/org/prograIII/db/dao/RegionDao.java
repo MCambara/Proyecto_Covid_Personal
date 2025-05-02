@@ -4,12 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.prograIII.db.model.RegionModel;
 import org.prograIII.db.dabaBaseConnection.DatabaseConnection;
-import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
 public class RegionDao {
 
     private static final Logger logger = LogManager.getLogger(RegionDao.class);

@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.prograIII.collectors.ExecutionCollector;
 import org.prograIII.db.service.ExecutionService;
-
 import java.util.Set;
 
 public class ExecutionProcessor {
