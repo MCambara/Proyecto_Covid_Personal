@@ -15,7 +15,7 @@ public class ReportQueryExecutor implements Runnable {
     private static final Logger logger = Logger.getLogger(ReportQueryExecutor.class.getName());
 
     static {
-        // Configurar el logger para imprimir solo el mensaje (sin nivel ni timestamp)
+        // Reconfiguro el log para que no me tire el log en el formato por defecto
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new Formatter() {
             @Override
@@ -24,8 +24,8 @@ public class ReportQueryExecutor implements Runnable {
             }
         });
 
-        logger.setUseParentHandlers(false); // Desactiva handlers por defecto
-        logger.addHandler(handler);        // Añade nuestro handler limpio
+        logger.setUseParentHandlers(false);
+        logger.addHandler(handler);
     }
 
     private final String date;
