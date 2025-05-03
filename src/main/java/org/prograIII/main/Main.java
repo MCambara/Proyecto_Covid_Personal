@@ -20,7 +20,7 @@ public class Main {
         logger.info("Select an option:");
         logger.info("1. Insert data using the thread.");
         logger.info("2. Show existing data by ISO and date.");
-        System.out.print("Option: ");   
+        logger.info("Option: ");
 
         int option = scanner.nextInt();
         scanner.nextLine();
